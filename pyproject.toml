@@ -1,0 +1,28 @@
+[tool.poetry]
+name = "-aliases"
+version = "0.1.0"
+description = ""
+authors = ["VasiliySilver <svaaugust@gmail.com>"]
+readme = "README.md"
+packages = [{include = "aliases"}]
+
+[tool.poetry.dependencies]
+python = "^3.12"
+commitizen = "^3.29.1"
+ruff = "^0.7.0"
+pytest = "^8.3.3"
+black = "^24.10.0"
+isort = "^5.13.2"
+
+
+
+[tool.commitizen]
+name = "cz_conventional_commits"
+tag_format = "$version"
+version_scheme = "pep440"
+version_provider = "poetry"
+update_changelog_on_bump = true
+major_version_zero = true
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
