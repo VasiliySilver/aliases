@@ -63,7 +63,7 @@ function lint() {
     echo "Проверка кода завершена."
 }
 
-function lint_fix() {
+function lint-fix() {
     echo "Проверка кода линтером и автоисправление..."
     directories=""
     while IFS= read -p "Введите директорию для проверки (или оставьте пустым для продолжения): " dir; do
@@ -263,6 +263,7 @@ EOF
 
 # Функция для создания новой ветки
 function fs() {
+    git log --pretty=oneline --abbrev-commit -4 
     echo "Создание новой ветки..."
     echo -n "Введите имя ветки: "
     read branch_name
@@ -277,8 +278,6 @@ function fs() {
 function ff() {
     echo "Завершение текущей ветки..."
     current_branch=$(git rev-parse --abbrev-ref HEAD)
-    
-    
     
     if [[ $current_branch == feature/* ]]; then
         branch_name="${current_branch#feature/}"
@@ -305,17 +304,8 @@ function ff() {
     
     echo "Создание коммита..."
     cz commit
-    
-    
-    # Добавляем проверку наличия удаленного репозитория
-    remote=$(git rev-parse --abbrev-ref @{u} 2>/dev/null)
-    if [ -z "$remote" ]; then
-        echo "Удаленный репозиторий не настроен. Пожалуйста, добавьте его:"
-        read -p "Введите URL удаленного репозитория: " repo_url
-        git remote add origin "$repo_url"
-    fi
-    
-    git push --all
+
+    git flow feature finish $branch_name
 }
 
 # Функция дл�� начала и завершения нового ��елиза
