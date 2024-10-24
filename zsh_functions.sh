@@ -266,20 +266,32 @@ fs() {
     echo "2 последних изменения в репозитории:"
     git log --oneline -4
     
-    # Get highest existing A-N number from commit messages
-    current_max=$(git log --oneline | grep -oE 'feat\(A-[0-9]+\)' | cut -d'-' -f2 | sed 's/)//' | sort -n | tail -1)
+    # Try to detect project prefix from existing commits - handles both single letters and complex prefixes
+    prefix=$(git log --oneline | grep -oE 'feat\(([A-Z]-|[A-Z0-9]+-)?[0-9]+\)' | head -1 | grep -oE '[A-Z]-|[A-Z0-9]+-' || echo "")
+    
+    # Get highest existing number from commit messages
+    current_max=$(git log --oneline | grep -oE 'feat\(([A-Z]-|[A-Z0-9]+-)?[0-9]+\)' | grep -oE '[0-9]+' | sort -n | tail -1)
     
     # Set next number (or start with 1 if no branches exist)
     next_num=$((${current_max:-0} + 1))
     
-    # Generate new branch name
-    feature="A-${next_num}"
+    # Generate suggested branch name
+    suggested_feature="${prefix}${next_num}"
+    
+    echo "Создать ветку с автоматическим названием '$suggested_feature'? (y/n)"
+    read auto_name
+    
+    if [ "$auto_name" = "y" ]; then
+        feature=$suggested_feature
+    else
+        echo "Введите название новой ветки"
+        read custom_name
+        feature=$custom_name
+    fi
     
     echo "Создание новой ветки: $feature"
     git flow feature start "$feature"
 }
-
-
 
 
 # Функция для завершения ветки
