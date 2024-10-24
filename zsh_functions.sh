@@ -370,13 +370,8 @@ release() {
         return 1
     fi
     
-    if ! git push origin master; then
-        echo "Ошибка: Не удалось отправить изменения в master."
-        return 1
-    fi
-    
-    if ! git push origin develop; then
-        echo "Ошибка: Не удалось отправить изменения в develop."
+    if ! git push --all; then
+        echo "Ошибка: Не удалось отправить изменения в origin."
         return 1
     fi
     
