@@ -1,3 +1,9 @@
+## 0.4.0 (2024-10-24)
+
+### Feat
+
+- **A-8**: update fs function, check prefix and current brunch
+
 ## 0.3.0 (2024-10-24)
 
 ### Feat
