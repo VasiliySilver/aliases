@@ -262,62 +262,79 @@ EOF
 }
 
 # Функция для создания новой ветки
-function fs() {
-    git log --pretty=oneline --abbrev-commit -4 
-    echo "Создание новой ветки..."
-    echo -n "Введите имя ветки: "
-    read branch_name
-    if [ -n "$branch_name" ]; then
-        git flow feature start "$branch_name"
-    else
-        echo "Имя ветки не указано."
-    fi
+fs() {
+    echo "2 последних изменения в репозитории:"
+    git log --oneline -4
+    
+    # Get highest existing A-N number from commit messages
+    current_max=$(git log --oneline | grep -oE 'feat\(A-[0-9]+\)' | cut -d'-' -f2 | sed 's/)//' | sort -n | tail -1)
+    
+    # Set next number (or start with 1 if no branches exist)
+    next_num=$((${current_max:-0} + 1))
+    
+    # Generate new branch name
+    feature="A-${next_num}"
+    
+    echo "Создание новой ветки: $feature"
+    git flow feature start "$feature"
 }
 
+
+
+
 # Функция для завершения ветки
-function ff() {
-    echo "Завершение текущей ветки..."
-    current_branch=$(git rev-parse --abbrev-ref HEAD)
+ff() {
+    current_branch=$(git branch --show-current)
+    feature=${current_branch#feature/}
     
-    if [[ $current_branch == feature/* ]]; then
-        branch_name="${current_branch#feature/}"
-        git flow feature finish "$branch_name"
-    elif [ "$current_branch" = "develop" ]; then
-        echo "Вы находитесь на ветке develop. Завершение ветки не требуется."
-    else
-        echo "Текущая ветка не является веткой функциональности."
-        return
+    echo "Текущая ветка: $feature"
+    echo "Хотите завершить ветку $feature? (y/N)"
+    read confirm
+    
+    if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
+        echo "Отмена завершения ветки"
+        return 0
     fi
     
     echo "Текущий статус репозитория:"
     git status
     
-    echo -n "Хотите добавить все изменения? (y/n): "
+    echo "Хотите добавить все изменения? (y/n)"
     read add_all
     if [ "$add_all" = "y" ]; then
         git add .
     else
-        echo -n "Введите файлы для добавления (через пробел): "
+        echo "Введите файлы для добавления (через пробел)"
         read files
         git add $files
     fi
     
     echo "Создание коммита..."
     cz commit
-
-    git flow feature finish $branch_name
+    git flow feature finish "$feature"
+    git push --all
 }
 
-# Функция дл�� начала и завершения нового ��елиза
-function release() {
+
+# Функция для релиза
+release() {
     echo "Определение следующей версии..."
-    result=$(cz bump --dry-run)
-    next_version=$(echo "$result" | grep -oP '\d+\.\d+\.\d+' | tail -n 1)
+    next_version=$(cz bump --dry-run | grep "version" | awk '{print $3}')
+    
     if [ -z "$next_version" ]; then
-        echo "Ошибка: Не удалось опре��елить следующую версию."
-        read -p "Введите номер релиза вручную: " version
+        echo "Ошибка: Не удалось определить следующую версию."
         return 1
     fi
+    
+    echo "Следующая версия: $next_version"
+    read -p "Подтверждаете ли вы эту версию? (y/n): " confirm
+    
+    if [ "$confirm" != "y" ]; then
+        read -p "Введите номер релиза вручную: " version
+    else
+        version=$next_version
+    fi
+    
     echo "Создание новой ветки релиза: $version"
     if ! git flow release start "$version"; then
         echo "Ошибка: Не удалось создать ветку релиза."
@@ -329,30 +346,37 @@ function release() {
         echo "Ошибка: Не удалось сгенерировать changelog."
         return 1
     fi
+    
     if ! cz bump --yes; then
         echo "Ошибка: Не удалось обновить версию."
         return 1
     fi
+    
     if ! git tag -d "$version" 2> /dev/null; then
         echo "Предупреждение: Тег $version не найден для удаления."
     fi
+    
     if ! git flow release finish "$version"; then
         echo "Ошибка: Не удалось завершить релиз."
         return 1
     fi
+    
     if ! git push origin master; then
-        echo "Ошибка: Не удалось отправить изменени�� в master."
+        echo "Ошибка: Не удалось отправить изменения в master."
         return 1
     fi
+    
     if ! git push origin develop; then
-        echo "Ошибка: Не удалось ��тправить изменения в develop."
+        echo "Ошибка: Не удалось отправить изменения в develop."
         return 1
     fi
+    
     if ! git push --tag; then
         echo "Ошибка: Не удалось отправить теги."
         return 1
     fi
 }
+
 
 # Функция для начала нового хотфикса
 function start-hotfix() {
