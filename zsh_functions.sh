@@ -319,7 +319,14 @@ ff() {
 # Функция для релиза
 release() {
     echo "Определение следующей версии..."
-    next_version=$(cz bump --dry-run | grep "version" | awk '{print $3}')
+    
+    # Check if any tags exist
+    if ! git tag | grep -q "^v"; then
+        next_version="0.2.0"
+        echo "Первый релиз. Следующая версия: $next_version"
+    else
+        next_version=$(cz bump --dry-run | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | tail -1)
+    fi
     
     if [ -z "$next_version" ]; then
         echo "Ошибка: Не удалось определить следующую версию."
@@ -327,10 +334,12 @@ release() {
     fi
     
     echo "Следующая версия: $next_version"
-    read -p "Подтверждаете ли вы эту версию? (y/n): " confirm
+    echo "Подтверждаете ли вы эту версию? (y/n)"
+    read confirm
     
     if [ "$confirm" != "y" ]; then
-        read -p "Введите номер релиза вручную: " version
+        echo "Введите номер релиза вручную"
+        read version
     else
         version=$next_version
     fi
@@ -376,6 +385,7 @@ release() {
         return 1
     fi
 }
+
 
 
 # Функция для начала нового хотфикса
