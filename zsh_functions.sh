@@ -320,17 +320,13 @@ ff() {
 release() {
     echo "Определение следующей версии..."
     
-    # Check if any tags exist
-    if ! git tag | grep -q "^v"; then
+    # Get next version from commitizen
+    next_version=$(cz bump --dry-run | grep "bump: version" | awk -F'→' '{gsub(/^[ \t]+|[ \t]+$/, "", $2); print $2}')
+    
+    # If no version found, set initial version
+    if [ -z "$next_version" ]; then
         next_version="0.2.0"
         echo "Первый релиз. Следующая версия: $next_version"
-    else
-        next_version=$(cz bump --dry-run | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | tail -1)
-    fi
-    
-    if [ -z "$next_version" ]; then
-        echo "Ошибка: Не удалось определить следующую версию."
-        return 1
     fi
     
     echo "Следующая версия: $next_version"
@@ -370,13 +366,8 @@ release() {
         return 1
     fi
     
-    if ! git push origin master; then
-        echo "Ошибка: Не удалось отправить изменения в master."
-        return 1
-    fi
-    
-    if ! git push origin develop; then
-        echo "Ошибка: Не удалось отправить изменения в develop."
+    if ! git push --all; then
+        echo "Ошибка: Не удалось отправить изменения в origin."
         return 1
     fi
     
