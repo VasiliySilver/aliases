@@ -1,3 +1,10 @@
+## 0.3.0 (2024-10-24)
+
+### Feat
+
+- **A-7**: update next version identification in release function
+- **A-6**: update push command in release function
+
 ## 0.2.0 (2024-10-24)
 
 ### Feat
