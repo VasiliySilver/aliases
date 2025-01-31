@@ -8,16 +8,15 @@ fs() {
         return 1
     fi
 
-    # Получаем список всех веток с префиксом #
-    branches=$(git branch -a | grep -oE "feature/#[0-9]+" | sort -V -u)
-    
-    if [[ -z "$branches" ]]; then
-        # Если веток нет, начинаем с 1
-        next_num=1
+    # Получаем список всех feature веток и извлекаем их номера
+    feature_branches=$(git branch | grep -E 'feature/#[0-9]+' | sed -E 's/.*feature\/#([0-9]+).*/\1/')
+
+    # Находим максимальный номер, если ветки есть
+    if [ -n "$feature_branches" ]; then
+        next_num=$(echo "$feature_branches" | sort -nr | head -n1)
+        next_num=$((next_num + 1))
     else
-        # Получаем последний номер и инкрементируем
-        last_branch=$(echo "$branches" | tail -1 | grep -oE "#[0-9]+" | tr -d '#')
-        next_num=$((last_branch + 1))
+        next_num=1
     fi
 
     # Генерируем название ветки
