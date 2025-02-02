@@ -8,21 +8,21 @@ fs() {
         return 1
     fi
 
-    # Получаем список всех feature веток и извлекаем их номера
-    feature_branches=$(git branch | grep -E 'feature/#[0-9]+' | sed -E 's/.*feature\/#([0-9]+).*/\1/')
+    # Извлечение номеров задач (только числа) из коммитов
+    feature_branches=$(git log --oneline | grep -E 'feat\((.*)\): #([0-9]+) - ' | sed -E 's/.*#([0-9]+).*/\1/')
 
-    # Находим максимальный номер, если ветки есть
-    if [ -n "$feature_branches" ]; then
-        next_num=$(echo "$feature_branches" | sort -nr | head -n1)
-        next_num=$((next_num + 1))
+    # Если список веток пуст, начинаем с 1
+    if [ -z "$feature_branches" ]; then
+      next_num=1
     else
-        next_num=1
+      # Получение следующего номера, сортировка по убыванию и прибавление 1
+      next_num=$(echo "$feature_branches" | sort -nr | head -n1)
+      next_num=$((next_num + 1))
     fi
 
-    # Генерируем название ветки
-    feature="#${next_num}"
+    feature="#$next_num"
 
-    # Проверяем, существует ли уже такая ветка
+    # Проверяем, существует ли уже такая веткa
     if git show-ref --quiet refs/heads/feature/"$feature"; then
         echo "Ошибка: Ветка 'feature/$feature' уже существует."
         return 1
