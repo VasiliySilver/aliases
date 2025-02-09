@@ -27,10 +27,9 @@ ff() {
 
     # Проверяем наличие commitizen и создаем завершающий коммит
     if ! command -v cz >/dev/null 2>&1; then
-        echo -e "\e[33mПредупреждение: commitizen не установлен\e[0m"
-        echo "Для лучшего опыта работы рекомендуется установить commitizen:"
+        echo -e "\e[33mОшибка: commitizen не установлен\e[0m"
+        echo "Для завершения ветки необходим commitizen. Установите его с помощью:"
         echo "poetry add commitizen"
-        echo "Для продолжения установите commitizen"
         return 1
     fi
 
