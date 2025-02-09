@@ -8,26 +8,17 @@ fs() {
         return 1
     fi
 
-    # Получаем номера из всех форматов коммитов (включая старые chore)
-    feature_branches=$(git log --oneline | grep -E '(feat|chore)\((.*)\): (#[0-9]+|[A-Z]+-[0-9]+)' | sed -E 's/.*?(#[0-9]+|[A-Z]+-[0-9]+).*/\1/' | sed 's/#//')
-
-    # Если список веток пуст, начинаем с 1
-    if [ -z "$feature_branches" ]; then
-        next_num=1
+    # Ищем последний коммит с форматом M-N, исключая мерджи и теги
+    last_feature=$(git log --oneline --no-merges | grep -E 'feat\(M-[0-9]+\):' | head -n1)
+    
+    if [ -n "$last_feature" ]; then
+        # Извлекаем номер из последнего M-N коммита
+        current_num=$(echo "$last_feature" | sed -E 's/.*feat\(M-([0-9]+)\).*/\1/')
+        next_num=$((current_num + 1))
+        feature="M-${next_num}"
     else
-        next_num=$(echo "$feature_branches" | sort -nr | head -n1)
-        next_num=$((next_num + 1))
-    fi
-
-    # Определяем формат новой ветки на основе последнего feat коммита
-    last_commit=$(git log --oneline | grep -E 'feat\((.*)\): ' | head -n1)
-    if echo "$last_commit" | grep -q 'feat([A-Z]+-[0-9]+)'; then
-        # Формат MP-123
-        prefix=$(echo "$last_commit" | sed -E 's/.*feat\(([A-Z]+-)[0-9]+\).*/\1/')
-        feature="${prefix}${next_num}"
-    else
-        # Формат #123
-        feature="#$next_num"
+        # Если нет коммитов с M-N форматом, начинаем с M-1
+        feature="M-1"
     fi
 
     # Проверяем, существует ли уже такая веткa
