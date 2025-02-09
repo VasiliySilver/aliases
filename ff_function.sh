@@ -23,21 +23,22 @@ ff() {
             echo "Ошибка: Нет изменений для коммита. Завершение ветки отменено."
             return 1
         fi
+    fi
 
-        # Проверяем наличие commitizen
-        if ! command -v cz >/dev/null 2>&1; then
-            echo -e "\e[33mПредупреждение: commitizen не установлен\e[0m"
-            echo "Для лучшего опыта работы рекомендуется установить commitizen:"
-            echo "poetry add commitizen"
-            echo "Создание обычного коммита..."
-            git commit -m "feat: завершение работы над веткой ${feature}"
-        else
-            # Пытаемся создать коммит через commitizen
-            if ! cz commit; then
-                echo "Создание обычного коммита..."
-                git commit -m "feat: завершение работы над веткой ${feature}"
-            fi
-        fi
+    # Проверяем наличие commitizen и создаем завершающий коммит
+    if ! command -v cz >/dev/null 2>&1; then
+        echo -e "\e[33mПредупреждение: commitizen не установлен\e[0m"
+        echo "Для лучшего опыта работы рекомендуется установить commitizen:"
+        echo "poetry add commitizen"
+        echo "Для продолжения установите commitizen"
+        return 1
+    fi
+
+    # Создаем завершающий коммит через commitizen
+    echo "Создание завершающего коммита через commitizen..."
+    if ! cz commit; then
+        echo "Ошибка: не удалось создать коммит через commitizen"
+        return 1
     fi
 
     # Завершаем ветку с git-flow
