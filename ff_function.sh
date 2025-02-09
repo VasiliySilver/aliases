@@ -24,11 +24,19 @@ ff() {
             return 1
         fi
 
-        # Создаем коммит
-        if command -v cz commit > /dev/null 2>&1; then
-            cz commit
+        # Проверяем наличие commitizen
+        if ! command -v cz >/dev/null 2>&1; then
+            echo -e "\e[33mПредупреждение: commitizen не установлен\e[0m"
+            echo "Для лучшего опыта работы рекомендуется установить commitizen:"
+            echo "poetry add commitizen"
+            echo "Создание обычного коммита..."
+            git commit -m "feat: завершение работы над веткой ${feature}"
         else
-            git commit -m "chore(${feature}): завершение работы над веткой"
+            # Пытаемся создать коммит через commitizen
+            if ! cz commit; then
+                echo "Создание обычного коммита..."
+                git commit -m "feat: завершение работы над веткой ${feature}"
+            fi
         fi
     fi
 

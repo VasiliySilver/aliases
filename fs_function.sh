@@ -8,19 +8,27 @@ fs() {
         return 1
     fi
 
-    # Извлечение номеров задач (только числа) из коммитов
-    feature_branches=$(git log --oneline | grep -E 'feat\((.*)\): #([0-9]+) - ' | sed -E 's/.*#([0-9]+).*/\1/')
+    # Получаем номера из всех форматов коммитов (включая старые chore)
+    feature_branches=$(git log --oneline | grep -E '(feat|chore)\((.*)\): (#[0-9]+|[A-Z]+-[0-9]+)' | sed -E 's/.*?(#[0-9]+|[A-Z]+-[0-9]+).*/\1/' | sed 's/#//')
 
     # Если список веток пуст, начинаем с 1
     if [ -z "$feature_branches" ]; then
-      next_num=1
+        next_num=1
     else
-      # Получение следующего номера, сортировка по убыванию и прибавление 1
-      next_num=$(echo "$feature_branches" | sort -nr | head -n1)
-      next_num=$((next_num + 1))
+        next_num=$(echo "$feature_branches" | sort -nr | head -n1)
+        next_num=$((next_num + 1))
     fi
 
-    feature="#$next_num"
+    # Определяем формат новой ветки на основе последнего feat коммита
+    last_commit=$(git log --oneline | grep -E 'feat\((.*)\): ' | head -n1)
+    if echo "$last_commit" | grep -q 'feat([A-Z]+-[0-9]+)'; then
+        # Формат MP-123
+        prefix=$(echo "$last_commit" | sed -E 's/.*feat\(([A-Z]+-)[0-9]+\).*/\1/')
+        feature="${prefix}${next_num}"
+    else
+        # Формат #123
+        feature="#$next_num"
+    fi
 
     # Проверяем, существует ли уже такая веткa
     if git show-ref --quiet refs/heads/feature/"$feature"; then
