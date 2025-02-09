@@ -25,8 +25,8 @@ ff() {
         fi
 
         # Создаем коммит
-        if command -v cz > /dev/null 2>&1; then
-            cz
+        if command -v cz commit > /dev/null 2>&1; then
+            cz commit
         else
             git commit -m "chore(${feature}): завершение работы над веткой"
         fi

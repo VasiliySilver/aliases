@@ -16,7 +16,7 @@ alias ls='ls --color'
 alias la='ls -la --color'
 alias nvim=lvim
 alias vi=lvim
-alias jmrui='JVM_ARGS="-Dsun.java2d.uiScale=2" jmeter'
+alias jmrui='jmeter'
 
 # Используйте 'help_aliases' для получения информации о ваших алиасах.
 alias h='history'
