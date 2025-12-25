@@ -26,5 +26,5 @@ alias r='rm -i'
 alias e='exit'
 alias aliases='tmxs aliases'
 alias ks='pkill -f tmux'
-
+alias ap="ansible-playbook"
 

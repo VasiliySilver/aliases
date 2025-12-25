@@ -10,6 +10,8 @@ alias tmxns='tmuxifier ns'   # Создать новую сессию без и�
 # Сессии
 alias cursor='tmxs cursor'   # Загрузить конфигурацию cursor
 
+alias youtube='tmxs youtube'
+
 alias gwsvc='tmxs gwsvc'
 
 alias tmxk='tmuxifier kill-session'

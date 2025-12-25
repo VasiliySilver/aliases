@@ -56,7 +56,7 @@ function init-python-project() {
 
     # Установка зависимостей для разработки
     echo "Установка зависимостей для разработки..."
-    poetry add ruff pytest black isort --dev
+    poetry add ruff pytest black isort commitizen --dev
 
     # Проверка и установка commitizen через npm
     echo "Проверка и установка commitizen через npm..."
@@ -247,7 +247,7 @@ EOF
 
     # Выполнение функций старта и финиша новой фичи
     echo "Выполнение функций старта и финиша новой фичи..."
-    git flow feature start C-1
+    git flow feature start #1 
     git add .
     git commit -m "feat: init project"
 
